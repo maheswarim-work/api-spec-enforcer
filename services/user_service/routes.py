@@ -11,10 +11,20 @@ The following endpoints are MISSING and should be detected by the compliance che
 - DELETE /users/{user_id} (delete user)
 """
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException, Query
 
-from services.user_service.database import get_all_users, get_user_by_id
+from services.user_service.database import (
+    get_all_users,
+    get_user_by_id,
+    create_user as db_create_user,
+    update_user as db_update_user,
+    delete_user as db_delete_user,
+)
 from services.user_service.schemas import HTTPError, User, UserList
+from services.user_service.schemas import UserCreate, UserUpdate
+from fastapi import Response
 
 router = APIRouter(tags=["users"])
 
@@ -58,3 +68,45 @@ async def get_user(user_id: int) -> User:
 #
 # These will be detected as compliance gaps and can be auto-generated.
 # =============================================================================
+
+
+@router.post("/users", status_code=201)
+async def create_user(data: UserCreate) -> User:
+    """Create a new user
+
+    Create a new user with the provided information
+    """
+    user_data = await db_create_user(
+        email=data.email,
+        name=data.name,
+        is_active=data.is_active if data.is_active is not None else True,
+    )
+    return User(**user_data)
+
+
+@router.put("/users/{user_id}")
+async def update_user(user_id: int, data: UserUpdate) -> User:
+    """Update user by ID
+
+    Update an existing user's information
+    """
+    user_data = await db_update_user(
+        user_id=user_id,
+        email=data.email,
+        name=data.name,
+        is_active=data.is_active,
+    )
+    if not user_data:
+        raise HTTPException(status_code=404, detail="User not found")
+    return User(**user_data)
+
+
+@router.delete("/users/{user_id}", status_code=204)
+async def delete_user(user_id: int) -> None:
+    """Delete user by ID
+
+    Permanently delete a user from the system
+    """
+    deleted = await db_delete_user(user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="User not found")
