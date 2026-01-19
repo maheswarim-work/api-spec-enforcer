@@ -24,7 +24,7 @@ Automatically generate Python code to implement missing endpoints, following the
 
 ```python
 from pathlib import Path
-from agents.fix_agent import FixAgent
+from agents import FixAgent
 from core.compliance_checker import ComplianceChecker
 
 # After running compliance check

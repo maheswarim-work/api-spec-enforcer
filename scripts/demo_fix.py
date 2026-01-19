@@ -10,14 +10,15 @@ This script demonstrates the endpoint fix workflow:
 import sys
 from pathlib import Path
 
-# Add project root to path
+# Add project root and .claude to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / ".claude"))
 
 from core.openapi_parser import OpenAPIParser
 from core.fastapi_inspector import FastAPIInspector
 from core.compliance_checker import ComplianceChecker
-from agents.fix_agent import FixAgent
+from agents import FixAgent
 
 
 def main() -> None:

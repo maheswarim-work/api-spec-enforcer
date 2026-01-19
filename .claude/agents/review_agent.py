@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from agents.base import Agent
+from .base import Agent
 from core.compliance_checker import ComplianceChecker
 from core.fastapi_inspector import FastAPIInspector
 from core.models import ComplianceReport

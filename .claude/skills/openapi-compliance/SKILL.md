@@ -89,7 +89,7 @@ endpoints = parser.endpoints
 
 ### Step 2: Generate Tests
 ```python
-from agents.test_agent import TestAgent
+from agents import TestAgent
 
 test_agent = TestAgent()
 result = test_agent.execute(endpoints=endpoints)

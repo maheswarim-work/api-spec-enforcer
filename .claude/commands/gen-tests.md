@@ -32,7 +32,7 @@ pytest tests/generated/ -v
 ```python
 from pathlib import Path
 from core.openapi_parser import OpenAPIParser
-from agents.test_agent import TestAgent
+from agents import TestAgent
 
 # Parse the spec
 parser = OpenAPIParser(Path("spec/openapi.yaml"))

@@ -33,7 +33,7 @@ from pathlib import Path
 from core.openapi_parser import OpenAPIParser
 from core.fastapi_inspector import FastAPIInspector
 from core.compliance_checker import ComplianceChecker
-from agents.fix_agent import FixAgent
+from agents import FixAgent
 
 # Run compliance check first
 parser = OpenAPIParser(Path("spec/openapi.yaml"))

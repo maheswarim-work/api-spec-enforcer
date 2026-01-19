@@ -24,7 +24,7 @@ Automatically create comprehensive test suites that validate API implementations
 ```python
 from pathlib import Path
 from core.openapi_parser import OpenAPIParser
-from agents.test_agent import TestAgent
+from agents import TestAgent
 
 # Parse spec
 parser = OpenAPIParser(Path("spec/openapi.yaml"))

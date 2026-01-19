@@ -10,12 +10,13 @@ This script demonstrates the test generation workflow:
 import sys
 from pathlib import Path
 
-# Add project root to path
+# Add project root and .claude to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / ".claude"))
 
 from core.openapi_parser import OpenAPIParser
-from agents.test_agent import TestAgent
+from agents import TestAgent
 
 
 def main() -> None:
