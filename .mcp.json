@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json.schemastore.org/mcp.json",
+  "name": "api-spec-enforcer",
+  "description": "MCP configuration for API Contract Enforcer - selective context loading",
+  "version": "1.0.0",
+  "contextTypes": {
+    "spec": {
+      "description": "OpenAPI specification and non-functional requirements",
+      "files": [
+        "spec/openapi.yaml",
+        "spec/non_functional_spec.md"
+      ]
+    },
+    "service": {
+      "description": "Target service source files",
+      "patterns": [
+        "services/**/*.py"
+      ],
+      "exclude": [
+        "**/__pycache__/**",
+        "**/__init__.py"
+      ]
+    },
+    "standards": {
+      "description": "Coding standards and conventions summary",
+      "inline": {
+        "python_style": [
+          "Use async/await for all I/O operations",
+          "Type hints required on all functions",
+          "Google-style docstrings",
+          "snake_case for functions, PascalCase for classes"
+        ],
+        "api_design": [
+          "RESTful conventions",
+          "Consistent error responses with 'detail' field",
+          "Pagination for list endpoints"
+        ],
+        "testing": [
+          "pytest with async support",
+          "One test per endpoint minimum",
+          "80% code coverage target"
+        ]
+      }
+    }
+  },
+  "agents": {
+    "spec-validator": {
+      "path": ".claude/agents/spec-validator.md",
+      "context": ["spec", "service"]
+    },
+    "gap-fixer": {
+      "path": ".claude/agents/gap-fixer.md",
+      "context": ["spec", "service", "standards"]
+    },
+    "test-generator": {
+      "path": ".claude/agents/test-generator.md",
+      "context": ["spec", "service"]
+    }
+  },
+  "commands": {
+    "enforce": {
+      "path": ".claude/commands/enforce.md",
+      "description": "Run API compliance check"
+    },
+    "fix-gaps": {
+      "path": ".claude/commands/fix-gaps.md",
+      "description": "Generate code for missing endpoints"
+    },
+    "gen-tests": {
+      "path": ".claude/commands/gen-tests.md",
+      "description": "Generate pytest tests from spec"
+    }
+  },
+  "skills": {
+    "openapi-compliance": {
+      "path": ".claude/skills/openapi-compliance/SKILL.md",
+      "description": "Comprehensive OpenAPI compliance and test generation"
+    }
+  }
+}

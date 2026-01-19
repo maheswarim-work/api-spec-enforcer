@@ -64,13 +64,17 @@ Pipeline: SpecAgent → CodeAgent → Checker → FixAgent/TestAgent → ReviewA
 Provides selective context to agents. Use `ContextProvider.get_context([ContextType.SPEC, ContextType.SERVICE])` instead of loading entire repo.
 
 ### Custom Commands (`.claude/commands/`)
-- `/check_api_compliance` - Run compliance check
-- `/fix_missing_endpoints` - Generate code fixes
-- `/generate_api_tests` - Generate pytest tests
+- `/enforce` - Run API compliance check
+- `/fix-gaps` - Generate code for missing endpoints
+- `/gen-tests` - Generate pytest tests from spec
 
-### Skills (`.claudeskills/`)
-- `api_compliance.md` - Reusable compliance analysis skill
-- `test_generation.md` - Reusable test generation skill
+### Skills (`.claude/skills/`)
+- `openapi-compliance/SKILL.md` - Comprehensive compliance and test generation skill
+
+### Agents (`.claude/agents/`)
+- `spec-validator.md` - Validates implementation against OpenAPI spec
+- `gap-fixer.md` - Generates code for missing endpoints
+- `test-generator.md` - Generates pytest tests from spec
 
 ## Key Files
 

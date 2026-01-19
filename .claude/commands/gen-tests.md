@@ -17,7 +17,17 @@ Run this command to automatically generate test cases for your API endpoints. Te
 3. Write tests to `tests/generated/test_api_endpoints.py`
 4. Run the tests to verify they pass
 
-Execute the following Python code:
+## Quick Run
+
+```bash
+# Generate tests
+python scripts/demo_generate_tests.py
+
+# Run generated tests
+pytest tests/generated/ -v
+```
+
+## Programmatic Usage
 
 ```python
 from pathlib import Path
@@ -39,16 +49,6 @@ print(test_agent.format_output())
 test_content = test_agent.write_tests(result.output, dry_run=False)
 print(f"\nTests written to: {result.output.output_file}")
 print(f"\nGenerated {result.output.test_count} tests")
-```
-
-Alternatively, run:
-```bash
-python scripts/demo_generate_tests.py
-```
-
-Then run the tests:
-```bash
-pytest tests/generated/ -v
 ```
 
 ## Generated Test Structure

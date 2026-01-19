@@ -1,4 +1,4 @@
-# Check API Compliance
+# Enforce API Compliance
 
 Check the FastAPI service implementation against the OpenAPI specification.
 
@@ -17,7 +17,13 @@ Run this command to generate a compliance report showing:
 3. Run the ComplianceChecker to compare spec vs implementation
 4. Generate and display a formatted compliance report
 
-Execute the following Python code to run the compliance check:
+## Quick Run
+
+```bash
+python scripts/demo_compliance.py
+```
+
+## Programmatic Usage
 
 ```python
 from pathlib import Path
@@ -25,25 +31,28 @@ from core.openapi_parser import OpenAPIParser
 from core.fastapi_inspector import FastAPIInspector
 from core.compliance_checker import ComplianceChecker
 
-# Parse the spec
-parser = OpenAPIParser(Path("spec/openapi.yaml"))
-parser.parse()
+def run_compliance_check(
+    spec_path: str = "spec/openapi.yaml",
+    service_path: str = "services/user_service"
+) -> tuple:
+    """Run a compliance check and return results."""
+    parser = OpenAPIParser(Path(spec_path))
+    parser.parse()
 
-# Inspect the service
-inspector = FastAPIInspector(Path("services/user_service"))
-inspector.inspect()
+    inspector = FastAPIInspector(Path(service_path))
+    inspector.inspect()
 
-# Run compliance check
-checker = ComplianceChecker(parser, inspector)
-report = checker.check()
+    checker = ComplianceChecker(parser, inspector)
+    report = checker.check()
 
-# Display report
+    return parser, inspector, checker, report
+
+# Run check
+parser, inspector, checker, report = run_compliance_check()
 print(report.format_report())
-```
 
-Alternatively, run the demo script:
-```bash
-python scripts/demo_compliance.py
+# Get missing endpoints for follow-up
+missing = checker.get_missing_endpoints()
 ```
 
 ## Expected Output

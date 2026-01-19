@@ -1,10 +1,10 @@
-# Fix Missing Endpoints
+# Fix API Gaps
 
 Generate and apply code fixes for endpoints defined in the spec but missing from the implementation.
 
 ## Usage
 
-Run this command after `/check_api_compliance` reveals missing endpoints. This command will:
+Run this command after `/enforce` reveals missing endpoints. This command will:
 - Generate placeholder implementations for missing endpoints
 - Ensure correct function signatures and response schemas
 - Apply non-breaking changes only (no modifications to existing code)
@@ -16,7 +16,17 @@ Run this command after `/check_api_compliance` reveals missing endpoints. This c
 3. Show the generated code for review
 4. Apply fixes to `services/user_service/routes.py`
 
-Execute the following Python code:
+## Quick Run
+
+```bash
+# Dry run (preview changes)
+python scripts/demo_fix.py
+
+# Apply changes
+python scripts/demo_fix.py --apply
+```
+
+## Programmatic Usage
 
 ```python
 from pathlib import Path
@@ -59,11 +69,6 @@ if missing:
         print(content[-500:])  # Show last 500 chars
 else:
     print("No missing endpoints - implementation is compliant!")
-```
-
-Alternatively, run:
-```bash
-python scripts/demo_fix.py
 ```
 
 ## Non-Breaking Changes Policy
