@@ -72,9 +72,9 @@ Provides selective context to agents. Use `ContextProvider.get_context([ContextT
 - `openapi-compliance/SKILL.md` - Comprehensive compliance and test generation skill
 
 ### Agents (`.claude/agents/`)
-- `spec-validator/AGENT.md` - Validates implementation against OpenAPI spec
-- `gap-fixer/AGENT.md` - Generates code for missing endpoints
-- `test-generator/AGENT.md` - Generates pytest tests from spec
+- `spec_validator/AGENT.md` - Validates implementation against OpenAPI spec (+ Python code)
+- `gap_fixer/AGENT.md` - Generates code for missing endpoints (+ Python code)
+- `test_generator/AGENT.md` - Generates pytest tests from spec (+ Python code)
 
 ## Key Files
 
