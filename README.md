@@ -36,27 +36,30 @@ pytest tests/ -v
 
 ```
 api-spec-enforcer/
-├── spec/                    # Source of truth
-│   ├── openapi.yaml         # OpenAPI 3.0 specification
-│   └── non_functional_spec.md
-├── services/user_service/   # Example FastAPI service (intentionally incomplete)
-├── core/                    # Core enforcement logic
-│   ├── openapi_parser.py    # Parse OpenAPI specs
-│   ├── fastapi_inspector.py # Inspect FastAPI routes
-│   ├── compliance_checker.py # Compare spec vs implementation
-│   └── code_generator.py    # Generate endpoint code
-├── agents/                  # Multi-agent system
-│   ├── spec_agent.py        # Parses specifications
-│   ├── code_agent.py        # Inspects codebase
-│   ├── fix_agent.py         # Generates fixes
-│   ├── test_agent.py        # Generates tests
-│   └── review_agent.py      # Validates output
-├── mcp/                     # MCP context provider
-├── .claude/                 # Claude Code configuration
-│   ├── commands/            # Custom slash commands
-│   ├── agents/              # Agent definitions
-│   └── skills/              # Reusable skill prompts
-└── .mcp.json                # MCP context configuration
+├── spec/                        # Source of truth
+│   ├── openapi.yaml             # OpenAPI 3.0 specification
+│   └── non_functional_spec.md   # Coding standards
+├── services/user_service/       # Example FastAPI service
+├── core/                        # Core enforcement logic
+│   ├── openapi_parser.py        # Parse OpenAPI specs
+│   ├── fastapi_inspector.py     # Inspect FastAPI routes
+│   ├── compliance_checker.py    # Compare spec vs implementation
+│   └── code_generator.py        # Generate endpoint code
+├── mcp/                         # MCP context provider
+├── scripts/                     # Demo scripts
+├── tests/                       # Test suite
+├── .claude/                     # Claude Code configuration
+│   ├── agents/                  # Agent definitions + Python code
+│   │   ├── spec_validator/      # AGENT.md + spec_agent.py, code_agent.py
+│   │   ├── gap_fixer/           # AGENT.md + fix_agent.py
+│   │   ├── test_generator/      # AGENT.md + test_agent.py
+│   │   ├── base.py              # Base agent class
+│   │   └── review_agent.py      # Review agent
+│   ├── commands/                # Slash commands (/enforce, /fix-gaps, /gen-tests)
+│   └── skills/                  # Reusable skills
+│       └── openapi-compliance/  # SKILL.md
+├── .mcp.json                    # MCP context configuration
+└── CLAUDE.md                    # Claude Code instructions
 ```
 
 ## How to Run the Service
@@ -91,21 +94,19 @@ API COMPLIANCE REPORT
 Spec: User Management API v1.0.0
 ------------------------------------------------------------
 Endpoints in spec:        5
-Endpoints implemented:    2
-Compliant endpoints:      2
-Compliance:               40.0%
+Endpoints implemented:    6
+Compliant endpoints:      5
+Compliance:               100.0%
 ------------------------------------------------------------
-Errors:   3
-Warnings: 0
+Errors:   0
+Warnings: 1
 ------------------------------------------------------------
 ISSUES:
-  [ERROR] Missing endpoint: POST /users
-           Suggestion: Implement POST handler for /users
-  [ERROR] Missing endpoint: PUT /users/{user_id}
-           Suggestion: Implement PUT handler for /users/{user_id}
-  [ERROR] Missing endpoint: DELETE /users/{user_id}
-           Suggestion: Implement DELETE handler for /users/{user_id}
+  [WARN]  Extra endpoint not in spec: GET /health
+           Suggestion: Add endpoint to OpenAPI spec or remove from implementation
 ============================================================
+
+Result: COMPLIANT
 ```
 
 ### `/fix-gaps`
@@ -224,7 +225,7 @@ pip install -e ".[dev]"
 pytest tests/ -v
 
 # With coverage
-pytest tests/ --cov=core --cov=agents --cov-report=term-missing
+pytest tests/ --cov=core --cov=services --cov-report=term-missing
 
 # Specific test file
 pytest tests/test_compliance.py -v
@@ -237,7 +238,7 @@ pytest tests/test_compliance.py -v
 ruff check .
 
 # Type check with mypy
-mypy core agents mcp
+mypy core mcp
 ```
 
 ## Architecture Decisions
