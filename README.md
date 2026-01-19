@@ -52,8 +52,11 @@ api-spec-enforcer/
 │   ├── test_agent.py        # Generates tests
 │   └── review_agent.py      # Validates output
 ├── mcp/                     # MCP context provider
-├── .claude/commands/        # Custom slash commands
-└── .claudeskills/           # Reusable skill prompts
+├── .claude/                 # Claude Code configuration
+│   ├── commands/            # Custom slash commands
+│   ├── agents/              # Agent definitions
+│   └── skills/              # Reusable skill prompts
+└── .mcp.json                # MCP context configuration
 ```
 
 ## How to Run the Service
@@ -72,7 +75,7 @@ open http://localhost:8000/docs
 
 ## How to Run Commands
 
-### `/check_api_compliance`
+### `/enforce`
 
 Runs SpecAgent + CodeAgent to generate a compliance report:
 
@@ -105,7 +108,7 @@ ISSUES:
 ============================================================
 ```
 
-### `/fix_missing_endpoints`
+### `/fix-gaps`
 
 Uses FixAgent to generate code for missing endpoints:
 
@@ -117,7 +120,7 @@ python scripts/demo_fix.py
 python scripts/demo_fix.py --apply
 ```
 
-### `/generate_api_tests`
+### `/gen-tests`
 
 Uses TestAgent to create pytest tests:
 
