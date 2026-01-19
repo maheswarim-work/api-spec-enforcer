@@ -31,13 +31,13 @@ python scripts/demo_generate_tests.py
 pytest tests/ -v
 
 # Run with coverage
-pytest tests/ --cov=core --cov=agents --cov-report=term-missing
+pytest tests/ --cov=core --cov=services --cov-report=term-missing
 
 # Lint
 ruff check .
 
 # Type check
-mypy core agents mcp
+mypy core mcp
 ```
 
 ## Architecture
@@ -49,7 +49,7 @@ mypy core agents mcp
 - `code_generator.py` - Generates Python code for missing endpoints and tests
 - `models.py` - Shared dataclasses: EndpointInfo, SchemaInfo, ComplianceIssue, etc.
 
-### Multi-Agent System (`agents/`)
+### Multi-Agent System (`.claude/agents/`)
 Pipeline: SpecAgent → CodeAgent → Checker → FixAgent/TestAgent → ReviewAgent
 
 | Agent | Purpose |
@@ -67,6 +67,7 @@ Provides selective context to agents. Use `ContextProvider.get_context([ContextT
 - `/enforce` - Run API compliance check
 - `/fix-gaps` - Generate code for missing endpoints
 - `/gen-tests` - Generate pytest tests from spec
+- `/run-agent` - Run a specific agent as a sub-agent
 
 ### Skills (`.claude/skills/`)
 - `openapi-compliance/SKILL.md` - Comprehensive compliance and test generation skill
@@ -76,15 +77,39 @@ Provides selective context to agents. Use `ContextProvider.get_context([ContextT
 - `gap_fixer/AGENT.md` - Generates code for missing endpoints (+ Python code)
 - `test_generator/AGENT.md` - Generates pytest tests from spec (+ Python code)
 
+## Using Sub-Agents with Task Tool
+
+To run agents as Claude Code sub-agents, use the Task tool with `general-purpose` type:
+
+```python
+# Example: Run spec-validator as a sub-agent
+Task(
+  subagent_type="general-purpose",
+  prompt="""
+    Read .claude/agents/spec_validator/AGENT.md for instructions.
+    Then run compliance check using:
+    - core/openapi_parser.py to parse spec/openapi.yaml
+    - core/fastapi_inspector.py to inspect services/user_service
+    - core/compliance_checker.py to compare and generate report
+    Return the compliance report.
+  """
+)
+```
+
+Available agents to spawn:
+- `spec_validator` - Parse spec + inspect code + check compliance
+- `gap_fixer` - Generate code for missing endpoints
+- `test_generator` - Generate pytest tests from spec
+
 ## Key Files
 
 - `spec/openapi.yaml` - Source of truth for API contract (5 endpoints)
 - `spec/non_functional_spec.md` - Coding standards (async-only, type hints, 80% coverage)
-- `services/user_service/routes.py` - Intentionally incomplete (2/5 endpoints implemented)
+- `services/user_service/routes.py` - FastAPI route implementations (all 5 endpoints + health check)
 
 ## Spec-Driven Approach
 
-The OpenAPI spec is the single source of truth. All compliance checks, code generation, and tests derive from `spec/openapi.yaml`. The example service intentionally implements only GET /users and GET /users/{id} to demonstrate gap detection.
+The OpenAPI spec is the single source of truth. All compliance checks, code generation, and tests derive from `spec/openapi.yaml`.
 
 ## Non-Breaking Changes Policy
 
