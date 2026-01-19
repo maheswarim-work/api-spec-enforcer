@@ -130,32 +130,181 @@ python scripts/demo_generate_tests.py
 pytest tests/generated/ -v
 ```
 
-## How Agents Coordinate
+## Architecture Overview
 
-The multi-agent system follows a pipeline architecture:
+```mermaid
+flowchart TB
+    subgraph User["👤 User"]
+        CMD["/enforce, /fix-gaps, /gen-tests"]
+    end
+
+    subgraph Claude[".claude/ - Claude Code Configuration"]
+        subgraph Commands["📋 Commands"]
+            style Commands fill:#3b82f6,color:#fff
+            C1["enforce.md"]
+            C2["fix-gaps.md"]
+            C3["gen-tests.md"]
+        end
+
+        subgraph Skills["🎯 Skills"]
+            style Skills fill:#8b5cf6,color:#fff
+            S1["openapi-compliance/SKILL.md"]
+        end
+
+        subgraph Agents["🤖 Agents"]
+            style Agents fill:#10b981,color:#fff
+            A1["spec_validator/"]
+            A2["gap_fixer/"]
+            A3["test_generator/"]
+            A4["review_agent.py"]
+        end
+    end
+
+    subgraph MCP["🔌 MCP Context Provider"]
+        style MCP fill:#f59e0b,color:#fff
+        M1["ContextType.SPEC"]
+        M2["ContextType.SERVICE"]
+        M3["ContextType.STANDARDS"]
+    end
+
+    subgraph Core["⚙️ Core Logic"]
+        style Core fill:#6b7280,color:#fff
+        CO1["openapi_parser.py"]
+        CO2["fastapi_inspector.py"]
+        CO3["compliance_checker.py"]
+        CO4["code_generator.py"]
+    end
+
+    subgraph Sources["📁 Source Files"]
+        style Sources fill:#fbbf24,color:#000
+        SP["spec/openapi.yaml"]
+        SV["services/user_service/"]
+    end
+
+    CMD --> Commands
+    Commands --> Skills
+    Commands --> Agents
+    Skills -.->|"guides"| Agents
+    Agents --> MCP
+    MCP -->|"selective context"| Sources
+    Agents --> Core
+    Core --> Sources
+```
+
+## How Claude Code Components Work Together
+
+### 🔄 System Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as 👤 User
+    participant C as 📋 Command
+    participant S as 🎯 Skill
+    participant A as 🤖 Agent
+    participant M as 🔌 MCP
+    participant Core as ⚙️ Core
+    participant F as 📁 Files
+
+    U->>C: /enforce
+    C->>S: Load skill guidance
+    S-->>C: Compliance patterns
+    C->>A: Invoke SpecAgent + CodeAgent
+    A->>M: Request context (SPEC, SERVICE)
+    M->>F: Load only relevant files
+    F-->>M: openapi.yaml, routes.py
+    M-->>A: Filtered context (~6 files)
+    A->>Core: Parse & inspect
+    Core->>F: Read spec & service
+    Core-->>A: Structured data
+    A-->>C: ComplianceReport
+    C-->>U: 100% Compliant ✓
+```
+
+### 📋 Commands (`.claude/commands/`)
+
+Commands are user-invokable slash commands that orchestrate workflows:
+
+| Command | Purpose | Invokes |
+|---------|---------|---------|
+| `/enforce` | Check API compliance | SpecAgent → CodeAgent → Checker |
+| `/fix-gaps` | Generate missing endpoints | FixAgent |
+| `/gen-tests` | Generate pytest tests | TestAgent |
+
+### 🎯 Skills (`.claude/skills/`)
+
+Skills are reusable knowledge modules that guide agent behavior:
 
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  SpecAgent  │────▶│  CodeAgent  │────▶│   Checker   │
-│ Parse spec  │     │Inspect code │     │  Compare    │
-└─────────────┘     └─────────────┘     └──────┬──────┘
-                                               │
-                    ┌──────────────────────────┴──────────────────────────┐
-                    │                                                      │
-                    ▼                                                      ▼
-            ┌─────────────┐                                       ┌─────────────┐
-            │  FixAgent   │                                       │  TestAgent  │
-            │Generate code│                                       │Generate tests│
-            └──────┬──────┘                                       └──────┬──────┘
-                   │                                                      │
-                   └──────────────────────┬───────────────────────────────┘
-                                          │
-                                          ▼
-                                  ┌─────────────┐
-                                  │ ReviewAgent │
-                                  │  Validate   │
-                                  └─────────────┘
+.claude/skills/openapi-compliance/SKILL.md
+├── Compliance analysis patterns
+├── Test generation best practices
+└── Code generation rules
 ```
+
+**Why Skills?** They provide consistent guidance across commands without duplicating instructions.
+
+### 🤖 Agents (`.claude/agents/`)
+
+Each agent has both configuration (`AGENT.md`) and implementation (`*.py`):
+
+```
+.claude/agents/
+├── spec_validator/          # Validates spec compliance
+│   ├── AGENT.md             # Agent definition & instructions
+│   ├── spec_agent.py        # Parses OpenAPI specs
+│   └── code_agent.py        # Inspects FastAPI routes
+├── gap_fixer/               # Fixes missing endpoints
+│   ├── AGENT.md
+│   └── fix_agent.py
+├── test_generator/          # Generates tests
+│   ├── AGENT.md
+│   └── test_agent.py
+└── review_agent.py          # Final validation
+```
+
+### 🔌 MCP - Model Context Protocol (`.mcp.json`)
+
+MCP provides **selective context loading** - agents receive only relevant files:
+
+```mermaid
+flowchart LR
+    subgraph Full["📦 Full Repository"]
+        F1["spec/"]
+        F2["services/"]
+        F3["tests/"]
+        F4["scripts/"]
+        F5["node_modules/"]
+        F6[".git/"]
+    end
+
+    subgraph MCP["🔌 MCP Filter"]
+        style MCP fill:#f59e0b,color:#fff
+        M["ContextProvider"]
+    end
+
+    subgraph Filtered["✅ Agent Context"]
+        style Filtered fill:#10b981,color:#fff
+        A1["spec/openapi.yaml"]
+        A2["spec/non_functional_spec.md"]
+        A3["services/user_service/*.py"]
+    end
+
+    Full --> MCP
+    MCP --> Filtered
+
+    style F3 fill:#ef4444,color:#fff
+    style F4 fill:#ef4444,color:#fff
+    style F5 fill:#ef4444,color:#fff
+    style F6 fill:#ef4444,color:#fff
+```
+
+**Benefits:**
+- 🚀 **90% fewer tokens** - Only relevant files loaded
+- 🎯 **Focused context** - Agents see what they need
+- 🔒 **Security** - Sensitive files excluded
+
+### Agent Pipeline
 
 | Agent | Responsibility | Input | Output |
 |-------|---------------|-------|--------|
