@@ -45,15 +45,15 @@
   },
   "agents": {
     "spec-validator": {
-      "path": ".claude/agents/spec-validator.md",
+      "path": ".claude/agents/spec-validator/AGENT.md",
       "context": ["spec", "service"]
     },
     "gap-fixer": {
-      "path": ".claude/agents/gap-fixer.md",
+      "path": ".claude/agents/gap-fixer/AGENT.md",
       "context": ["spec", "service", "standards"]
     },
     "test-generator": {
-      "path": ".claude/agents/test-generator.md",
+      "path": ".claude/agents/test-generator/AGENT.md",
       "context": ["spec", "service"]
     }
   },
